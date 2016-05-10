@@ -1,0 +1,10 @@
+---
+development:
+  theme_id: 121928071
+  password: 4ac241f721942c168bcbb89cc20fc361
+  store: ruairi-plus.myshopify.com
+  ignore_files:
+  - node_modules/
+  - '*.md'
+  - '*.yml'
+  - '*.zip'
