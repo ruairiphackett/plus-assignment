@@ -1,0 +1,240 @@
+<div itemscope itemtype="http://schema.org/Product">
+
+  <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+  <meta itemprop="image" content="{{ product.featured_image.src | img_url: 'grande' }}">
+
+  <div class="section-header section-header--breadcrumb">
+    {% include 'breadcrumb' %}
+  </div>
+
+  <div class="product-single">
+    <div class="grid product-single__hero">
+      <div class="grid__item post-large--one-half">
+
+        {% if settings.product_thumbnails_position == 'below' or product.images.size < 2 %}
+
+          <div class="product-single__photos" id="ProductPhoto">
+            {% assign featured_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image %}
+            <img src="{{ featured_image | img_url: '1024x1024' }}" alt="{{ featured_image.alt | escape }}" id="ProductPhotoImg"{% if settings.product_image_zoom_type == 'zoom-in' %} data-zoom="{{ featured_image | img_url: '1024x1024' }}"{% endif %} data-image-id="{{ featured_image.id }}">
+          </div>
+
+          {% if product.images.size > 1 %}
+
+            <ul class="product-single__thumbnails grid-uniform" id="ProductThumbs">
+              {% for image in product.images %}
+                <li class="grid__item wide--one-quarter large--one-third medium-down--one-third">
+                  <a data-image-id="{{ image.id }}" href="{{ image.src | img_url: '1024x1024' }}" class="product-single__thumbnail">
+                    <img src="{{ image.src | img_url: 'grande' }}" alt="{{ image.alt | escape }}">
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+
+          {% endif %}
+
+        {% else %}
+
+          <div class="grid">
+
+            <div class="grid__item four-fifths product-single__photos" id="ProductPhoto">
+              {% assign featured_image = product.selected_or_first_available_variant.featured_image | default: product.featured_image %}
+              <img src="{{ featured_image | img_url: '1024x1024' }}" alt="{{ featured_image.alt | escape }}" id="ProductPhotoImg"{% if settings.product_image_zoom_type == 'zoom-in' %} data-zoom="{{ featured_image | img_url: '1024x1024' }}"{% endif %} data-image-id="{{ featured_image.id }}">
+            </div>
+
+            <div class="grid__item one-fifth">
+
+              <ul class="grid product-single__thumbnails" id="ProductThumbs">
+                {% for image in product.images %}
+                  <li class="grid__item">
+                    <a data-image-id="{{ image.id }}" href="{{ image.src | img_url: '1024x1024' }}" class="product-single__thumbnail">
+                      <img src="{{ image.src | img_url: 'grande' }}" alt="{{ image.alt | escape }}">
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+
+            </div>
+
+          </div>
+
+        {% endif %}
+
+        {% if settings.product_image_zoom_type == 'lightbox' %}
+        <ul class="gallery" class="hidden">
+          {% for image in product.images %}
+          <li data-image-id="{{ image.id }}" class="gallery__item" data-mfp-src="{{ image | img_url: '1024x1024' }}"></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+      </div>
+      <div class="grid__item post-large--one-half">
+        {% if settings.product_vendor_enable %}
+          <h3 itemprop="brand">{{ product.vendor }}</h3>
+        {% endif %}
+        <h1 itemprop="name">{{ product.title }}</h1>
+
+        <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+          {% assign variant = product.selected_or_first_available_variant %}
+
+          <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+          <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+
+          <div class="product-single__prices">
+            <span id="ProductPrice" class="product-single__price" itemprop="price">
+              {{ product.price | money }}
+            </span>
+
+            {% if product.compare_at_price > product.price %}
+              <s id="ComparePrice" class="product-single__sale-price">
+                {{ product.compare_at_price_max | money }}
+              </s>
+            {% endif %}
+          </div>
+
+          <!-- If the setting to allow uncool people to buy gloves is selected we don't run the validateReason function -->
+          <form name="ruairisForm" action="/cart/add" method="post" enctype="multipart/form-data" id="AddToCartForm" {% unless settings.allow_uncool_people_to_buy_gloves %}onsubmit="return validateReason()"{% endunless %}>
+            <select name="id" id="productSelect" class="product-single__variants">
+              {% for variant in product.variants %}
+                {% if variant.available %}
+
+                  <option {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} data-sku="{{ variant.sku }}" value="{{ variant.id }}">{{ variant.title }} - {{ variant.price | money_with_currency }}</option>
+
+                {% else %}
+                  <option disabled="disabled">
+                    {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+            </select>
+
+            <div class="product-single__quantity{% unless settings.product_quantity_enable %} is-hidden{% endunless %}">
+              <label for="Quantity">{{ 'products.product.quantity' | t }}</label>
+              <input type="number" id="Quantity" name="quantity" value="1" min="1" class="quantity-selector">
+            </div>
+            
+            <p class="line-item-property__field why-sell">
+              <label id="why-label" for="why-should-i-sell-you-this">Why should I sell you these gloves?</label>
+              <label class="small-and-italic">Will be embroidered on your gloves for ever and ever.</label>
+              <input required data-error="Give me a reason or I'm not going to sell to you." class="required" id="why-should-i-sell-you-this" type="text" name="properties[Why should I sell you these gloves?]">
+            </p>
+            
+            <p class="line-item-property__field">
+              <label for="upload-optional-glove-music-file">Upload optional glove music file</label>
+              <label class="small-and-italic">All of our gloves play music, if you want your own music to play add a file here! If you don't 'The Glove Song' by Glovey Gloverson will play.</label>
+              <input id="upload-optional-glove-music-file" type="file" accept="audio/*" name="properties[Upload optional glove music file]">
+            </p>
+
+            {% unless settings.stop-selling %}
+            <button type="submit" name="add" id="AddToCart" class="btn">
+              <span id="AddToCartText">{{ 'products.product.add_to_cart' | t }}</span>
+            </button>
+            {% endunless %}
+          
+            <button class="btn" onclick="doubleCart()">Double all items already in the cart for the craic!</button>
+          </form>
+
+          <div class="product-description rte" itemprop="description">
+            {{ product.description }}
+          </div>
+
+          {% if settings.social_sharing_products %}
+            <hr class="hr--clear hr--small">
+            <h4>{{ 'products.general.share_title' | t }}</h4>
+            {% include 'social-sharing' %}
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {% if settings.product_related_enable %}
+    {% include 'related-products' %}
+  {% endif %}
+
+</div>
+
+{{ 'option_selection.js' | shopify_asset_url | script_tag }}
+<script>
+  
+  Shopify.queue = [];
+  
+  function doubleCart() {
+    var currentCart = jQuery.getJSON('/cart.js', function(cart) {
+      jQuery.each(cart.items, function(index, cartItem) {
+        Shopify.queue.push( { 
+          id: cartItem.variant_id,
+          quantity: cartItem.quantity,
+          properties: cartItem.properties
+        });
+      });
+      if (Shopify.queue.length) {
+        Shopify.addQueuedUpItemsToCart();
+      }
+	});
+  }
+  
+  Shopify.addQueuedUpItemsToCart = function() {
+    if (Shopify.queue.length) {
+      var item = Shopify.queue.pop();
+      $.ajax({
+        url: '/cart/add',
+        dataType: 'json',
+        type: 'post',
+        data: item,
+        success: Shopify.addQueuedUpItemsToCart,
+        error: Shopify.addQueuedUpItemsToCart
+      });
+    }
+    else {
+      alert("Doubled the items in the cart :\)");
+    }
+  };
+  
+  function validateReason() {
+    var reason = document.forms["ruairisForm"]["properties[Why should I sell you these gloves?]"].value;
+    if (reason != "I'm cool") {
+      alert("I don't think you're not cool enough, try entering \"I\'m cool\" as the reason for me to sell you these gloves.");
+      
+      // A few jQuery changes.
+      $(".why-sell").addClass('error-background');
+      
+      // I could do this easier, but just want to use a few different jQuery functions like find.
+      $(".why-sell").find("#why-label").addClass("error-text-colour");
+      
+      return false;
+    }
+  }
+  
+  var selectCallback = function(variant, selector) {
+    timber.productPage({
+      money_format: "{{ shop.money_format }}",
+      variant: variant,
+      selector: selector,
+      translations: {
+        add_to_cart : "{{ 'products.product.add_to_cart' | t }}",
+        sold_out : "{{ 'products.product.sold_out' | t }}",
+        unavailable : "{{ 'products.product.unavailable' | t }}"
+      }
+    });
+  };
+
+  jQuery(function($) {
+    new Shopify.OptionSelectors('productSelect', {
+      product: {{ product | json }},
+      onVariantSelected: selectCallback,
+      enableHistoryState: true
+    });
+
+    // Add label if only one product option and it isn't 'Title'. Could be 'Size'.
+    {% if product.options.size == 1 and product.options.first != 'Title' %}
+      $('.selector-wrapper:eq(0)').prepend('<label for="productSelect-option-0">{{ product.options.first | escape }}</label>');
+    {% endif %}
+
+    // Hide selectors if we only have 1 variant and its title contains 'Default'.
+    {% if product.variants.size == 1 and product.variants.first.title contains 'Default' %}
+      $('.selector-wrapper').hide();
+    {% endif %}
+  });
+</script>
