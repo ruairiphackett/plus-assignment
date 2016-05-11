@@ -54,7 +54,12 @@
   {% if template contains 'customers' %}
     {{ 'shopify_common.js' | shopify_asset_url | script_tag }}
   {% endif %}
-  
+
+  <script>
+    // We have to set up the firstFiftyProducts array in here as we don't have access to the collections object in theme.js.liquid
+    var firstFiftyProducts = {{ collections.all.products | json }}; // Only returns the first 50 products, but that's enough
+  </script>
+
 </head>
 
 <body id="{{ page_title | handle }}" class="{% if customer %}customer-logged-in {% endif %}template-{{ template | replace: '.', ' ' | truncatewords: 1, '' | handle }}" >
@@ -196,7 +201,7 @@
             {% if article.image %}
               {% assign image_alt = article.title | escape %}
               <p>{{ article | img_url: 'large' | img_tag: image_alt, 'article__image' | link_to: article.url }}</p>
-            {% endif %}  
+            {% endif %}
             {% if article.excerpt.size > 0 %}
             <div class="clearfix">
               {{ article.excerpt }}
@@ -317,83 +322,6 @@
       {{ 'social-buttons.js' | asset_url | script_tag }}
     {% endif %}
   {% endif %}
-  
-  {% if template contains 'product' %}
-  <script>
-    jQuery(function($) {
-      $('form[action="/cart/add"]').submit(function() {
-        var formIsValid = true;
-        var message = "Please fill this out and you will be able to add the item to your cart.";
-        $(this).find('[name^="properties"]').filter('.required, [required="required"]').each(function() {
-          $(this).removeClass('error');
-          if (formIsValid && $(this).val() == '') {
-            formIsValid = false;
-            message = $(this).attr('data-error') || message;
-            $(this).addClass('error');
-          }
-        });
-        if (formIsValid){
-          return true;
-        }
-        else {
-          alert(message);
-          return false;
-        }
-      }).find('input, select, textarea').focus(function() {
-        $(this).removeClass('error');
-      });
-    });
-  </script>
-  {% endif %}
-  
-  <script>
-    var allItems = [];
-    var fiveItemsToAdd = [];
-    
-    function addFiveRandomItems() {
-      var products = {{ collections.all.products | json }}; // Only returns the first 50 products, but that's enough
-      for (var i = 0; i < products.length; i++) {
-        // Add all items in the store to the allItems arrary (not very efficient!)
-        allItems.push( { 
-          // Add the first variant of the product
-          id: products[i].variants[0].id,
-          quantity: 1
-        });
-      }
-      
-      for(var i = 0; i < 5; i++) {
-        // Add 5 random items to the array, the items will be a random entry between the start and end of the allItems array
-        fiveItemsToAdd.push(allItems[Math.floor(Math.random() * allItems.length)]);
-      }
-      if (fiveItemsToAdd.length) {
-        addFiveItemsToCart();
-      }
-    }
-    
-    var addFiveItemsToCart = function() {
-    if (fiveItemsToAdd.length) {
-      var item = fiveItemsToAdd.pop();
-      $.ajax({
-        url: '/cart/add',
-        dataType: 'json',
-        type: 'post',
-        data: item,
-        success: addFiveItemsToCart,
-        error: addFiveItemsToCart
-      });
-    }
-    else {
-      alert("Five random items added to the cart :\)");
-      window.location.href = '/cart';
-    }
-  };
-  </script>
-
-  <style>
-    input.error, select.error, textarea.error {
-      border-color: red;
-    }
-  </style>
 
 </body>
 </html>
