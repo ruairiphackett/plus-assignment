@@ -6,6 +6,8 @@ var afterResize=(function(){var t={};return function(callback,ms,uniqueId){if(!u
 
 window.theme = window.theme || {};
 
+var fiveItemsToAdd = [];
+
 theme.cacheSelectors = function () {
   theme.cache = {
     // General
@@ -156,6 +158,88 @@ theme.toggleMenu = function () {
       }
     }
   })
+};
+
+theme.doubleCart = function() {
+  var currentCart = jQuery.getJSON('/cart.js', function(cart) {
+    var quantities = [];
+    var totalToUpdate = 0;
+    jQuery.each(cart.items, function(index, cartItem) {
+      quantities.push(cartItem.quantity * 2);
+      totalToUpdate += cartItem.quantity * 2;
+    });
+    if (quantities.length) {
+      //var response = jQuery.post('/cart/update.js', {updates: quantities});
+
+      $.ajax({
+        type: 'POST',
+        url: '/cart/update.js',
+        data: {updates: quantities},
+        dataType: 'json',
+
+        // If the AJAX call is a success update the cart count(s) to the new total. There are two instances of .cart-count,
+        // one for mobile and one for desktop, both need to be updated.
+        // If the AJAX call is a success it means that the new cart count is equal to totalToUpdate. If one item can't be added
+        // we'll get an 422 error and none of the items will be added.
+        success: function() { $('.cart-count').each(function() { $(this).html( totalToUpdate ); }); },
+
+        // Else show an error message.
+        error: function() { alert( "Couldn't double items!" ); }
+      });
+    }
+  });
+};
+
+theme.validateReason = function() {
+  var reason = document.forms["ruairisForm"]["properties[Why should I sell you these gloves?]"].value;
+  if (reason != "I'm cool") {
+    // Check that the message hasn't been appended before, prevents the message being appended several times.
+    if ( $( ".uncool-message" ).length == 0 ) {
+      $( ".why-sell" ).append( "<p class=\"uncool-message\">{{ settings.uncool_message }}</p>" );
+    }
+
+    // A few jQuery changes.
+    $(".why-sell").addClass('error-box');
+
+    return false;
+  }
+};
+
+theme.addFiveRandomItems = function() {
+  for (var i = 0; i < 5; i++) {
+    fiveItemsToAdd.push( {
+      // Add the first variant of a random product
+      id: firstFiftyProducts[Math.floor(Math.random() * firstFiftyProducts.length)].variants[0].id,
+      quantity: 1
+    });
+  }
+
+  if (fiveItemsToAdd.length) {
+    theme.addFiveItemsToCart();
+  }
+};
+
+theme.addFiveItemsToCart = function() {
+  if (fiveItemsToAdd.length) {
+    var item = fiveItemsToAdd.pop();
+    $.ajax({
+      url: '/cart/add',
+      dataType: 'json',
+      type: 'post',
+      data: item,
+      success: theme.addFiveItemsToCart,
+
+      // If the AJAX call fails alert the user and continue.
+      error: function() {
+        alert("Unable to add an item with ID: " + item.id + " to the cart!");
+        theme.addFiveItemsToCart();
+      }
+    });
+  }
+  else {
+    alert("Five random items added to the cart :\)");
+    window.location.href = '/cart';
+  }
 };
 
 // Initialize theme's JS on docready

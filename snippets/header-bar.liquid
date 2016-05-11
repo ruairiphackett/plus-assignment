@@ -46,12 +46,12 @@
               <li>{{ 'layout.customer.or' | t }}</li>
               <li>
                 {{ 'layout.customer.create_account' | t | customer_register_link }}
-              </li>  
+              </li>
             {% endif %}
           </ul>
         {% endif %}
-        
-        <button class="btn" onclick="addFiveRandomItems()">Add 5 random items to the cart</button>
+
+        <button class="btn" onclick="theme.addFiveRandomItems()">Add 5 random items to the cart</button>
 
         {% unless settings.stop-selling %}
         <div class="header-bar__module">
@@ -85,10 +85,13 @@
       <span class="icon icon-hamburger" aria-hidden="true"></span>
       {{ 'layout.navigation.menu' | t }}
     </button>
+
+    {% unless settings.stop-selling %}
     <a href="/cart" class="cart-page-link mobile-cart-page-link">
       <span class="icon icon-cart header-bar__cart-icon" aria-hidden="true"></span>
       {{ 'layout.cart.title' | t }} <span class="cart-count{% if cart.item_count == 0 %} hidden-count{% endif %}">{{ cart.item_count }}</span>
     </a>
+    {% endunless %}
   </div>
   {% include 'mobile-nav' %}
 </div>
