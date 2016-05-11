@@ -692,7 +692,7 @@ h6 {
 @if ($colorBody == $colorFooterBg) or ($colorFooterBg == rgba(0,0,0,0))  {
   .main-content {
     padding-bottom: 0;
-    
+
     &:after {
       content: '';
       display: block;
@@ -710,7 +710,7 @@ h6 {
     {% else %}
       {% assign bg_image = 'bg-custom.png' %}
   {% endcase %}
-  
+
   {% if settings.bg_image_display == 'tile' %}
   html, body { background: $colorBody url('{{ bg_image | asset_url }}') repeat scroll; }
   {% elsif settings.bg_image_display == 'stretch' %}
@@ -1018,7 +1018,7 @@ h6 {
 .grid-link__title,
 .grid-link__meta {
   position: relative;
-  margin-bottom: 5px;  
+  margin-bottom: 5px;
 }
 
 .grid-link__title {
@@ -1034,7 +1034,7 @@ h6 {
 }
 
 .grid-link__meta {
-  font-size: .75em; 
+  font-size: .75em;
   line-height: 1.5;
   color: lighten($colorTextBody, 10%);
 }
@@ -2092,13 +2092,13 @@ input[type="submit"].password-page__signup-form__submit {
 .rte {
 }
 
-.even-section {
+.odd-section {
   background-color: aliceblue;
   padding: 40px;
   margin-bottom: 0px !important;
 }
 
-.odd-section {
+.even-section {
   background-color: #E5ECF3;
   padding: 40px;
   margin-bottom: 0px !important;
@@ -2108,11 +2108,8 @@ input[type="submit"].password-page__signup-form__submit {
   padding: 10px;
 }
 
-.error-background {
+.error-box {
   background-color: #F45B4F;
-}
-
-.error-text-colour {
   color: #fff;
 }
 
@@ -2122,4 +2119,15 @@ input[type="submit"].password-page__signup-form__submit {
 
 .cart-product-details {
   width: 360px;
+}
+
+.uncool-message {
+  margin: 0;
+}
+
+.double-button {
+  margin: -15px 0 10px 0;
+  max-width: 95%;
+  // Allows the text to break on to two lines for mobile.
+  white-space: normal;
 }
