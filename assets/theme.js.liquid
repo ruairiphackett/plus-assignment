@@ -6,8 +6,6 @@ var afterResize=(function(){var t={};return function(callback,ms,uniqueId){if(!u
 
 window.theme = window.theme || {};
 
-var fiveItemsToAdd = [];
-
 theme.cacheSelectors = function () {
   theme.cache = {
     // General
@@ -206,16 +204,29 @@ theme.validateReason = function() {
 };
 
 theme.addFiveRandomItems = function() {
-  for (var i = 0; i < 5; i++) {
-    fiveItemsToAdd.push( {
-      // Add the first variant of a random product
-      id: firstFiftyProducts[Math.floor(Math.random() * firstFiftyProducts.length)].variants[0].id,
-      quantity: 1
-    });
-  }
+  // Sets firstFiftyProducts to the object of the same name created in theme.liquid
+  var firstFiftyProducts = window.firstFiftyProducts || undefined;
 
-  if (fiveItemsToAdd.length) {
-    theme.addFiveItemsToCart();
+  // Check to see if the firstFiftyProducts object is undefined, in which case we alert the user and exit the function.
+  if (typeof firstFiftyProducts === "undefined") {
+    alert("firstFiftyProducts is not defined, can't add five random products.");
+  }
+  // If the firstFiftyProducts object is defined we can proceed.
+  else {
+    // Declare as an automatically global variable which can be used in the addFiveItemsToCart function.
+    fiveItemsToAdd = [];
+
+    for (var i = 0; i < 5; i++) {
+      fiveItemsToAdd.push( {
+        // Add the first variant of a random product
+        id: firstFiftyProducts[Math.floor(Math.random() * firstFiftyProducts.length)].variants[0].id,
+        quantity: 1
+      });
+    }
+
+    if (fiveItemsToAdd.length) {
+      theme.addFiveItemsToCart();
+    }
   }
 };
 
